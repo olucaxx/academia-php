@@ -1,0 +1,15 @@
+{
+    "name": "academia/poo",
+    "autoload": {
+        "psr-4": {
+            "Academia\\Poo\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "olucaxx",
+            "email": "devpereiralucas@gmail.com"
+        }
+    ],
+    "require": {}
+}
