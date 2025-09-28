@@ -30,7 +30,7 @@ class Aluno extends Pessoa {
 
     public function verificarPlano(): string { 
         $statusPlano = $this->planoAtivo?"Ativo":"Inativo";
-        return "|Matricula: $this->matricula\n|Mensalidade: $this->valorPlano\n|Vencimento: $this->vencimentoPlano\n|Plano: $statusPlano\n";
+        return "|Nome: $this->nome\n|Matricula: $this->matricula\n|Mensalidade: $this->valorPlano\n|Vencimento: $this->vencimentoPlano\n|Plano: $statusPlano\n";
     }
 
     public function alterarTreino(FichaTreino $treino) {

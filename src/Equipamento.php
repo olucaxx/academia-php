@@ -29,10 +29,6 @@ class Equipamento {
         $this->ativo=true;
     }
 
-    public function ativarEquipamento() {
-        $this->ativo=true;
-    }
-
     public function desativarEquipamento() {
         $this->ativo=false;
     }
