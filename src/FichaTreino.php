@@ -3,9 +3,17 @@
 namespace Academia\Poo;
 
 class FichaTreino { 
-    protected array $dias;
     protected array $treinos;
 
-    public function adicionarTreino(str $dia, Exercicio $exercicio, int $series, int $repeticoes, int $descanso) { }
-    public function consultarTreinos(): string { }
+    public function __construct(array $dias, array $exercicios, Personal $personal) {
+        $this->treinos=[];
+    }
+
+    public function adicionarTreino(string $dia, Exercicio $exercicio, int $series, int $repeticoes, int $descanso) {
+        $this->treinos[] = [$dia, $exercicio, $series, $repeticoes, $descanso ];
+    }
+    
+    public function consultarTreinos(): array { 
+        return $this->treinos;
+    }
 }
