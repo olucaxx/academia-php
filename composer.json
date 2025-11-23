@@ -1,0 +1,9 @@
+{
+    "name": "trabalho/academia-php",
+    "autoload": {
+        "psr-4": {
+            "Trabalho\\AcademiaPhp\\": "src/"
+        }
+    },
+    "require": {}
+}
