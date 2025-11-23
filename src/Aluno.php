@@ -11,10 +11,10 @@
         private DateTime $dataAdesao;
         private DateTime $vencimentoPlano;
         private bool $planoAtivo;
-        private ?FichaTreino $treinoAtual;
+        private FichaTreino $ficha;
 
         //CONSTRUTOR
-        public function __construct(string $cpf, string $nome, string $telefone, string $endereco, string $email, int $matricula, float $valorPlano, DateTime $dataAdesao, DateTime $vencimentoPlano) {
+        public function __construct(string $cpf, string $nome, string $telefone, string $endereco, string $email, int $matricula, float $valorPlano) {
             parent::__construct($cpf, $nome, $telefone, $endereco, $email);
             $this->setMatricula($matricula);
             $this->setValorPlano($valorPlano);
@@ -26,7 +26,8 @@
             $vencimentoPlano->add(new DateInterval('P30D'));
             $this->setVencimentoPlano($vencimentoPlano);
 
-            $this->planoAtivo = true;
+            $this->setPlanoAtivo(true);
+            $this->setFicha(new FichaTreino);
         }
 
         //GETTERS
@@ -50,8 +51,8 @@
             return $this->planoAtivo;
         }
 
-        public function getTreino(): ?FichaTreino {
-            return $this->treinoAtual;
+        public function getFicha(): FichaTreino {
+            return $this->ficha;
         }
 
         //SETTERS
@@ -75,8 +76,8 @@
             $this->planoAtivo = $planoAtivo;
         }
 
-        public function setTreino(FichaTreino $treino): void {
-            $this->treinoAtual = $treino;
+        public function setFicha(FichaTreino $treino): void {
+            $this->ficha = $treino;
         }
 
         //MÉTODOS
@@ -93,13 +94,12 @@
         public function verificarPlano(): string { 
             $statusPlano = $this->getPlanoAtivo() ? "Ativo" : "Inativo";
 
-            return "
-                - Matricula: {$this->getMatricula()}\n
-                - Plano: $statusPlano\n
-                - Adesão: {$this->getDataAdesao()->format('d/m/Y')}\n
-                - Vencimento: {$this->getVencimentoPlano()->format('d/m/Y')}\n
-                - Mensalidade: {$this->getValorPlano()}\n
-            ";
+            $infoPlano = "- Matricula: {$this->getMatricula()}\n";
+            $infoPlano .= "- Plano: $statusPlano\n";
+            $infoPlano .= "- Adesão: {$this->getDataAdesao()->format('d/m/Y')}\n";
+            $infoPlano .= "- Vencimento: {$this->getVencimentoPlano()->format('d/m/Y')}\n";
+            $infoPlano .= "- Mensalidade: {$this->getValorPlano()}\n";
+            return $infoPlano;
         }
 
         public function pegarDadosPessoais(): string

@@ -7,8 +7,7 @@ function linha(): void {
 }
 
 function ler(string $prompt): string {
-    $res = readline($prompt);
-    return $res === false ? '' : trim($res);
+    return trim(readline($prompt));
 }
 
 function pausar(): void {
@@ -40,12 +39,17 @@ function escolherDia(): ?string {
     foreach ($dias as $d) {
         echo "- {$d}\n";
     }
-    $dia = ler("Escolha o dia (seg/ter/qua/qui/sex/sab/dom): ");
-    if (!in_array($dia, $dias, true)) {
-        echo "Dia inválido.\n";
-        return null;
+    while (true) {
+        $dia = ler("Escolha o dia (seg/ter/qua/qui/sex/sab/dom) (Enter para cancelar): ");
+        if ($dia === "") {
+            return null;
+        }
+        if (!in_array($dia, $dias, true)) {
+            echo "Dia inválido.\n";
+            continue;
+        }
+        return $dia;
     }
-    return $dia;
 }
 
 function listarAlunos(array $alunos): void {
@@ -84,3 +88,16 @@ function listarEquipamentos(array $equipamentos): void {
     }
 }
 
+function lerSomenteNumeros(string $mensagem): string {
+    while (true) {
+        $input = trim(readline($mensagem));
+        
+        $stringTeste = str_replace(['.', ','], '', $input); // cria uma nova sem ponto ou virgula para verificar
+
+        if (ctype_digit($stringTeste)) { // ctype_digit ve se os caracteres são todos numericos
+            return $input;
+        }
+
+        echo "Valor inválido. Digite apenas números.\n";
+    }
+}

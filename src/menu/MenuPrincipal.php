@@ -4,24 +4,24 @@ namespace Trabalho\AcademiaPhp\Menu;
 
 use \Trabalho\AcademiaPhp\Personal;
 
-function menu(array &$alunos, array &$personals, array &$equipamentos, array &$exercicioTipos): void {
+function menuPrincipal(Dados $dados): void {
     while (true) {
         linha();
         echo "ACADEMIA - MENU PRINCIPAL\n";
         echo "1) Menu Aluno\n";
-        echo "2) Menu Instrutor\n";
-        echo "3) Cadastrar Personal (instrutor)\n";
+        echo "2) Menu Personal\n";
+        echo "3) Cadastrar Personal\n";
         echo "0) Sair\n";
         $op = ler("Opção: ");
         switch ($op) {
             case '1':
-                menuAluno($alunos, $equipamentos);
+                menuAluno($dados);
                 break;
             case '2':
-                menuInstrutor($alunos, $personals, $equipamentos, $exercicioTipos);
+                menuPersonal($dados);
                 break;
             case '3':
-                cadastrarPersonal($personals);
+                cadastrarPersonal($dados);
                 break;
             case '0':
                 echo "Saindo...\n";
@@ -33,17 +33,17 @@ function menu(array &$alunos, array &$personals, array &$equipamentos, array &$e
     }
 }
 
-function cadastrarPersonal(array &$personals): void {
+function cadastrarPersonal(Dados $dados): void {
     linha();
-    echo "CADASTRAR PERSONAL (INSTRUTOR)\n";
-    $cpf = ler("CPF: ");
+    echo "CADASTRAR PERSONAL\n";
+    $cpf = lerSomenteNumeros("CPF (somente números): ");
     $nome = ler("Nome: ");
-    $telefone = ler("Telefone: ");
+    $telefone = lerSomenteNumeros("Telefone (somente números: ");
     $endereco = ler("Endereço: ");
     $email = ler("Email: ");
     $cref = ler("CREF: ");
     $p = new Personal($cpf, $nome, $telefone, $endereco, $email, $cref);
-    $personals[] = $p;
+    $dados->adicionarPersonal($p);
     echo "Personal cadastrado.\n";
     pausar();
 }

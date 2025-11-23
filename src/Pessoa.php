@@ -71,13 +71,12 @@
 
         
         public function pegarDadosPessoais(): string {
-            return "
-                - CPF: {$this->getCpf()}\n
-                - Nome: {$this->getNome()}\n
-                - Telefone: {$this->getTelefone()}}\n
-                - Endereço: {$this->getEndereco()}\n
-                - Email: {$this->getEmail()}
-            ";
+            $dados = "- CPF: {$this->getCpf()}\n";                 
+            $dados .= "- Nome: {$this->getNome()}\n";
+            $dados .= "- Telefone: {$this->getTelefone()}}\n";
+            $dados .= "- Endereço: {$this->getEndereco()}\n";
+            $dados .= "- Email: {$this->getEmail()}\n";
+            return $dados;
         }
     }
 ?>

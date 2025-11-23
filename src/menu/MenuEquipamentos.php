@@ -4,11 +4,11 @@ namespace Trabalho\AcademiaPhp\Menu;
 
 use Trabalho\AcademiaPhp\Equipamento;
 
-function menu(array &$equipamentos): void {
+function menuEquipamentos(Dados $dados): void {
     while (true) {
         linha();
         echo "MENU MÁQUINAS\n";
-        listarEquipamentos($equipamentos);
+        listarEquipamentos($dados->getEquipamentos());
         echo "1) Adicionar máquina\n";
         echo "2) Ativar máquina\n";
         echo "3) Desativar máquina\n";
@@ -18,47 +18,34 @@ function menu(array &$equipamentos): void {
         switch ($op) {
             case '1':
                 $nome = ler("Nome do equipamento: ");
-                $ativ = strtolower(ler("Ativo? (s/n): "));
-                $ativo = ($ativ === 's' || $ativ === 'S');
+                while (true) {
+                    $funcionando = strtolower(ler("Ativo? (s/n): "));
+                    if ($funcionando != 's' && $funcionando != 'n') {
+                        echo "Opção inválida!\n";
+                        continue;
+                    }
+                    $ativo = $funcionando == 's';
+                }
                 $equip = new Equipamento($nome, $ativo);
-                $equipamentos[] = $equip;
+                $dados->adicionarEquipamento($equip);
                 echo "Equipamento adicionado.\n";
                 pausar();
                 break;
             case '2':
-                listarEquipamentos($equipamentos);
-                $idx = ler("Índice para ativar: ");
-                if ($idx === '' || !is_numeric($idx) || !array_key_exists((int)$idx, $equipamentos)) {
-                    echo "Índice inválido.\n";
-                    pausar();
-                    break;
-                }
-                $equipamentos[(int)$idx]->setAtivo(true);
-                echo "Equipamento ativado.\n";
-                pausar();
+                alterarEstadoEquipamento(true, $dados);
                 break;
             case '3':
-                listarEquipamentos($equipamentos);
-                $idx = ler("Índice para desativar: ");
-                if ($idx === '' || !is_numeric($idx) || !array_key_exists((int)$idx, $equipamentos)) {
-                    echo "Índice inválido.\n";
-                    pausar();
-                    break;
-                }
-                $equipamentos[(int)$idx]->setAtivo(false);
-                echo "Equipamento desativado.\n";
-                pausar();
+                alterarEstadoEquipamento(false, $dados);
                 break;
             case '4':
-                listarEquipamentos($equipamentos);
+                listarEquipamentos($dados->getEquipamentos());
                 $idx = ler("Índice para remover: ");
-                if ($idx === '' || !is_numeric($idx) || !array_key_exists((int)$idx, $equipamentos)) {
+                if ($idx === '' || !is_numeric($idx) || !array_key_exists((int)$idx, $dados->getEquipamentos())) {
                     echo "Índice inválido.\n";
                     pausar();
                     break;
                 }
-                unset($equipamentos[(int)$idx]);
-                $equipamentos = array_values($equipamentos);
+                $dados->removerEquipamento((int)$idx);
                 echo "Equipamento removido.\n";
                 pausar();
                 break;
@@ -69,4 +56,17 @@ function menu(array &$equipamentos): void {
                 pausar();
         }
     }
+}
+
+function alterarEstadoEquipamento(bool $estado, Dados $dados) {
+    listarEquipamentos($dados->getEquipamentos());
+    $idx = ler("Índice para ativar: ");
+    if ($idx === '' || !is_numeric($idx) || !array_key_exists((int)$idx, $dados->getEquipamentos())) {
+        echo "Índice inválido.\n";
+        pausar();
+        return;
+    }
+    ($dados->getEquipamentos())[(int)$idx]->setAtivo($estado);
+    echo "Estado alterado.\n";
+    pausar();
 }

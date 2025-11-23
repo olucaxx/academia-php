@@ -3,29 +3,30 @@
 namespace Trabalho\AcademiaPhp\Menu;
 
 use Trabalho\AcademiaPhp\Aluno;
+use Trabalho\AcademiaPhp\FichaTreino;
 
-function menuAluno(array &$alunos, array &$equipamentos): void {
+function menuAluno(Dados $dados): void {
     while (true) {
         linha();
         echo "MENU ALUNO\n";
-        listarAlunos($alunos);
-        echo "[Vazio para voltar]\n";
+        listarAlunos($dados->getAlunos());
+        echo "[Enter para voltar]\n";
         $idx = ler("Digite o índice do aluno para gerenciar: ");
         if ($idx === '') return;
-        if (!is_numeric($idx) || !array_key_exists((int)$idx, $alunos)) {
+        if (!is_numeric($idx) || !array_key_exists((int)$idx, $dados->getAlunos())) {
             echo "Aluno inválido.\n";
             pausar();
             continue;
         }
-        $aluno = $alunos[(int)$idx];
-        menuAlunoSelecionado($aluno, $equipamentos);
+        $aluno = ($dados->getAlunos())[(int)$idx];
+        menuAlunoSelecionado($aluno, $dados);
     }
 }
 
-function menuAlunoSelecionado(Aluno $aluno, array &$equipamentos): void {
+function menuAlunoSelecionado(Aluno $aluno, Dados $dados): void {
     while (true) {
         linha();
-        echo "Aluno: " . $aluno->getNome() . " | Matrícula: " . $aluno->getMatricula() . PHP_EOL;
+        echo "Aluno: " . $aluno->getNome() . " | Matrícula: " . $aluno->getMatricula() ."\n";
         echo "1) Treinar\n";
         echo "2) Pagar mensalidade (renovar)\n";
         echo "3) Cancelar plano\n";
@@ -35,7 +36,7 @@ function menuAlunoSelecionado(Aluno $aluno, array &$equipamentos): void {
         $op = ler("Opção: ");
         switch ($op) {
             case '1':
-                executarRotinaTreino($aluno, $equipamentos);
+                executarRotinaTreino($aluno, $dados->getEquipamentos());
                 break;
             case '2':
                 $aluno->renovarPlano();
@@ -48,11 +49,11 @@ function menuAlunoSelecionado(Aluno $aluno, array &$equipamentos): void {
                 pausar();
                 break;
             case '4':
-                echo $aluno->pegarDadosPessoais() . PHP_EOL;
+                echo $aluno->pegarDadosPessoais() . "\n";
                 pausar();
                 break;
             case '5':
-                $ficha = $aluno->getTreino();
+                $ficha = $aluno->getFicha();
                 if (!$ficha) {
                     echo "Aluno não possui ficha de treino.\n";
                 } else {
@@ -69,26 +70,20 @@ function menuAlunoSelecionado(Aluno $aluno, array &$equipamentos): void {
     }
 }
 
-function executarRotinaTreino(Aluno $aluno, array &$equipamentos): void {
-    // Verifica plano ativo
+function executarRotinaTreino(Aluno $aluno, array $equipamentos): void {
     if (!$aluno->getPlanoAtivo()) {
         echo "Plano inativo, impossível treinar.\n";
         pausar();
         return;
     }
 
-    $ficha = $aluno->getTreino();
-    if (!$ficha) {
-        echo "Aluno não possui ficha de treino.\n";
-        pausar();
-        return;
+    $dia = escolherDia();
+    if ($dia === null) { 
+        pausar(); 
+        return; 
     }
 
-    // escolher dia
-    $dia = escolherDia();
-    if ($dia === null) { pausar(); return; }
-
-    $treinos = $ficha->getTreinos()[$dia];
+    $treinos = $aluno->getFicha()->getTreinos()[$dia];
     if (empty($treinos)) {
         echo "Nenhum treino cadastrado para este dia.\n";
         pausar();
@@ -98,11 +93,10 @@ function executarRotinaTreino(Aluno $aluno, array &$equipamentos): void {
     foreach ($treinos as $tIndex => $treino) {
         linha();
         echo "Treino [$tIndex]:\n";
-        echo $treino->detalhes() . PHP_EOL;
+        echo $treino->detalhes() . "\n";
 
         $equip = $treino->getEquipamento();
         if ($equip !== null) {
-            // Verifica se o equipamento está no array global e se está ativo
             $equipEncontrado = null;
             foreach ($equipamentos as $e) {
                 if ($e->getNome() === $equip->getNome()) {
@@ -111,29 +105,16 @@ function executarRotinaTreino(Aluno $aluno, array &$equipamentos): void {
                 }
             }
             if ($equipEncontrado === null) {
-                echo "Equipamento associado não está cadastrado na academia. Impossível executar este exercício.\n";
+                echo "Equipamento associado não está mais cadastrado na academia. Impossível executar o exercício.\n";
                 continue;
             }
             if (!$equipEncontrado->getAtivo()) {
-                echo "Equipamento '{$equipEncontrado->getNome()}' está inativo. Impossível executar este exercício.\n";
+                echo "Equipamento '{$equipEncontrado->getNome()}' está inativo.\n";
                 continue;
             }
         }
 
-        $series = $treino->getSeries();
-        $reps = $treino->getRepeticoes();
-        $desc = $treino->getDescanso();
-
-        for ($s = 1; $s <= $series; $s++) {
-            echo "Série {$s}/{$series} - Repetições: {$reps}\n";
-            // Apenas imprimir a mensagem polimórfica conforme sua escolha F2
-            echo $treino->getTipo()->treinar();
-            if ($s < $series) {
-                $enter = readline("Pressione Enter para próxima série (descanso {$desc}s)...");
-            } else {
-                readline("Série finalizada. Pressione Enter para continuar...");
-            }
-        }
+        echo $treino->getTipo()->treinar();
     }
 
     echo "Treino do dia finalizado.\n";
@@ -145,11 +126,11 @@ function mostrarFicha(FichaTreino $ficha): void {
     foreach ($treinos as $dia => $arr) {
         echo strtoupper($dia) . ":\n";
         if (empty($arr)) {
-            echo "  (vazio)\n";
+            echo "  (sem treinos)\n";
             continue;
         }
         foreach ($arr as $i => $t) {
-            echo "  [$i] " . $t->detalhes() . PHP_EOL;
+            echo "  [$i] " . $t->detalhes();
         }
     }
 }

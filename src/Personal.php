@@ -17,15 +17,8 @@ class Personal extends Pessoa
     }
 
     private function setCref($cref)
-    {
-
-        
+    {        
         $this->cref = $cref;
-    }
-
-    private function atribuirTreino(Aluno $aluno, FichaTreino $fichaTreino)
-    {
-        $aluno->setTreino($fichaTreino);
     }
 
     public function pegarDadosPessoais(): string

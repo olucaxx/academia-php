@@ -5,57 +5,56 @@ namespace Trabalho\AcademiaPhp\Menu;
 use \Trabalho\AcademiaPhp\Personal;
 use \Trabalho\AcademiaPhp\Aluno;
 use \Trabalho\AcademiaPhp\Treino;
-use \Trabalho\AcademiaPhp\FichaTreino;
 
-function menu(array &$alunos, array &$personals, array &$equipamentos, array &$exercicioTipos): void {
+function menuPersonal(Dados $dados): void {
     while (true) {
         linha();
-        echo "MENU INSTRUTOR\n";
-        listarPersonals($personals);
-        echo "[Vazio para voltar]\n";
+        echo "MENU PERSONAL\n";
+        listarPersonals($dados->getPersonais());
+        echo "[Enter para voltar]\n";
         $idx = ler("Digite o índice do instrutor para logar como instrutor: ");
         if ($idx === '') return;
-        if (!is_numeric($idx) || !array_key_exists((int)$idx, $personals)) {
+        if (!is_numeric($idx) || !array_key_exists((int)$idx, $dados->getPersonais())) {
             echo "Instrutor inválido.\n";
             pausar();
             continue;
         }
-        $instrutor = $personals[(int)$idx];
-        menuSelecionado($instrutor, $alunos, $equipamentos, $exercicioTipos);
+        $personal = ($dados->getPersonais())[(int)$idx];
+        menuSelecionado($personal, $dados);
     }
 }
 
-function menuSelecionado(Personal $instrutor, array &$alunos, array &$equipamentos, array &$exercicioTipos): void {
-    global $personals;
+function menuSelecionado(Personal $personal, Dados $dados): void {
     while (true) {
         linha();
-        echo "Instrutor: " . $instrutor->getNome() . PHP_EOL;
+        echo "Personal: " . $personal->getNome() . "\n";
         echo "1) Cadastrar aluno\n";
         echo "2) Remover aluno\n";
         echo "3) Cancelar plano de aluno\n";
-        echo "4) Criar ficha de treino p/ aluno\n";
-        echo "5) Editar ficha de treino p/ aluno\n";
-        echo "6) Menu máquinas\n";
+        echo "4) Editar ficha de treino p/ aluno\n";
+        echo "5) Menu equipamentos\n";
+        echo "6) Informações do personal\n";
         echo "0) Voltar\n";
         $op = ler("Opção: ");
         switch ($op) {
             case '1':
-                cadastrarAluno($alunos);
+                cadastrarAluno($dados);
                 break;
             case '2':
-                removerAluno($alunos);
+                retirarAluno($dados);
                 break;
             case '3':
-                cancelarPlanoAluno($alunos);
+                cancelarPlanoAluno($dados);
                 break;
             case '4':
-                criarFichaParaAluno($alunos);
+                editarFicha($dados);
                 break;
             case '5':
-                editarFicha($alunos, $equipamentos, $exercicioTipos);
+                menuEquipamentos($dados);
                 break;
             case '6':
-                menuMaquinas($equipamentos);
+                echo $personal->pegarDadosPessoais() . "\n";
+                pausar();
                 break;
             case '0':
                 return;
@@ -66,97 +65,71 @@ function menuSelecionado(Personal $instrutor, array &$alunos, array &$equipament
     }
 }
 
-function cadastrarAluno(array &$alunos): void {
+function cadastrarAluno(Dados $dados): void {
     linha();
     echo "CADASTRAR ALUNO\n";
-    $cpf = ler("CPF: ");
+    $cpf = lerSomenteNumeros("CPF (somente números): ");
     $nome = ler("Nome: ");
-    $telefone = ler("Telefone: ");
+    $telefone = lerSomenteNumeros("Telefone (somente números: ");
     $endereco = ler("Endereço: ");
     $email = ler("Email: ");
-    $matricula = (int) ler("Matrícula (número): ");
-    $valorPlano = (float) ler("Valor do plano (ex: 120.00): ");
-    // Note: conforme sua classe Aluno, o construtor cria dataAdesao = now e vencimento = +30 dias
-    $aluno = new Aluno($cpf, $nome, $telefone, $endereco, $email, $matricula, $valorPlano, new DateTime(), new DateTime());
-    $alunos[] = $aluno;
+    $matricula = lerSomenteNumeros("Matrícula (somente números): ");
+    $valorPlano = lerSomenteNumeros("Valor do plano (ex: 120.00): ");
+    $aluno = new Aluno($cpf, $nome, $telefone, $endereco, $email, $matricula, $valorPlano, new \DateTime(), new \DateTime());
+    $dados->adicionarAluno($aluno);
     echo "Aluno cadastrado com sucesso.\n";
     pausar();
 }
 
-function removerAluno(array &$alunos): void {
+function retirarAluno(Dados $dados): void {
     linha();
     echo "REMOVER ALUNO\n";
-    listarAlunos($alunos);
+    listarAlunos($dados->getAlunos());
     $idx = ler("Índice do aluno a remover (vazio para cancelar): ");
     if ($idx === '') return;
-    if (!is_numeric($idx) || !array_key_exists((int)$idx, $alunos)) {
+    if (!is_numeric($idx) || !array_key_exists((int)$idx, $dados->getAlunos())) {
         echo "Índice inválido.\n";
         pausar();
         return;
     }
-    unset($alunos[(int)$idx]);
-    // reorganiza índices
-    $alunos = array_values($alunos);
+    $dados->removerAluno((int)$idx);
     echo "Aluno removido.\n";
     pausar();
 }
 
-function cancelarPlanoAluno(array &$alunos): void {
+function cancelarPlanoAluno(Dados $dados): void {
     linha();
     echo "CANCELAR PLANO DO ALUNO\n";
-    listarAlunos($alunos);
+    listarAlunos($dados->getAlunos());
     $idx = ler("Índice do aluno (vazio para cancelar): ");
     if ($idx === '') return;
-    if (!is_numeric($idx) || !array_key_exists((int)$idx, $alunos)) {
+    if (!is_numeric($idx) || !array_key_exists((int)$idx, $dados->getAlunos())) {
         echo "Índice inválido.\n";
         pausar();
         return;
     }
-    $alunos[(int)$idx]->cancelarPlano();
+    ($dados->getAlunos())[(int)$idx]->cancelarPlano();
     echo "Plano cancelado para o aluno.\n";
     pausar();
 }
 
-function criarFichaParaAluno(array &$alunos): void {
-    linha();
-    echo "CRIAR FICHA DE TREINO\n";
-    listarAlunos($alunos);
-    $idx = ler("Índice do aluno para criar a ficha (vazio para cancelar): ");
-    if ($idx === '') return;
-    if (!is_numeric($idx) || !array_key_exists((int)$idx, $alunos)) {
-        echo "Índice inválido.\n";
-        pausar();
-        return;
-    }
-    $aluno = $alunos[(int)$idx];
-    $ficha = new FichaTreino();
-    $aluno->setTreino($ficha);
-    echo "Ficha criada e associada ao aluno.\n";
-    pausar();
-}
-
-function editarFicha(array &$alunos, array &$equipamentos, array &$exercicioTipos): void {
+function editarFicha(Dados $dados): void {
     linha();
     echo "EDITAR FICHA DE TREINO\n";
-    listarAlunos($alunos);
-    $idx = ler("Índice do aluno (vazio para cancelar): ");
+    listarAlunos($dados->getAlunos());
+    $idx = ler("Indice do aluno (vazio para cancelar): ");
     if ($idx === '') return;
-    if (!is_numeric($idx) || !array_key_exists((int)$idx, $alunos)) {
+    if (!is_numeric($idx) || !array_key_exists((int)$idx, $dados->getAlunos())) {
         echo "Índice inválido.\n";
         pausar();
         return;
     }
-    $aluno = $alunos[(int)$idx];
-    $ficha = $aluno->getTreino();
-    if (!$ficha) {
-        echo "Aluno não possui ficha. Crie uma antes.\n";
-        pausar();
-        return;
-    }
+    $aluno = ($dados->getAlunos())[(int)$idx];
+    $ficha = $aluno->getFicha();
 
     while (true) {
         linha();
-        echo "Editar ficha - Aluno: " . $aluno->getNome() . PHP_EOL;
+        echo "Editar ficha - Aluno: " . $aluno->getNome() . "\n";
         mostrarFicha($ficha);
         echo "1) Adicionar exercício\n";
         echo "2) Remover exercício\n";
@@ -164,53 +137,73 @@ function editarFicha(array &$alunos, array &$equipamentos, array &$exercicioTipo
         $op = ler("Opção: ");
         if ($op === '0') return;
         if ($op === '1') {
-            // adicionar
             $dia = escolherDia();
             if ($dia === null) { pausar(); continue; }
 
             $nomeEx = ler("Nome do exercício (ex: Puxada) : ");
-            // listar tipos disponíveis
             echo "Tipos de exercício disponíveis:\n";
-            $keys = array_keys($exercicioTipos);
+            $keys = array_keys($dados->getExercicioTipos());
             foreach ($keys as $i => $k) {
                 echo "[$i] $k\n";
             }
-            $tipoIdx = (int) ler("Escolha o tipo (número): ");
-            if (!array_key_exists($tipoIdx, $keys)) {
-                echo "Tipo inválido.\n";
-                pausar();
-                continue;
+            while (true) {
+                $tipoIdx = lerSomenteNumeros("Escolha o tipo (número): ");
+                if (!array_key_exists($tipoIdx, $keys)) {
+                    echo "Tipo inválido.\n";
+                    pausar();
+                    continue;
+                }
+                break;
             }
-            $tipoClass = $exercicioTipos[$keys[$tipoIdx]];
-            /** @var Exercicio $tipoObj */
+            $tipoClass = $dados->getExercicioTipos()[$keys[$tipoIdx]];
             $tipoObj = new $tipoClass();
 
-            // equipamento opcional
-            $usarEquip = strtolower(ler("Deseja associar um equipamento? (s/n): "));
             $equipObj = null;
-            if ($usarEquip === 's' || $usarEquip === 'S') {
-                listarEquipamentos($equipamentos);
-                $eidx = ler("Escolha índice do equipamento (vazio para cancelar associação): ");
-                if ($eidx !== '' && is_numeric($eidx) && array_key_exists((int)$eidx, $equipamentos)) {
-                    $equipObj = $equipamentos[(int)$eidx];
-                } else {
-                    echo "Nenhum equipamento será associado.\n";
-                    $equipObj = null;
+            $associarEquip = false;
+            while (true) {
+                $usarEquip = strtolower(ler("Deseja associar um equipamento? (s/n): "));
+                if ($usarEquip !== 's' && $usarEquip !== 'n') {
+                    echo "Opção inválida!\n";
+                    continue;
+                }
+                $associarEquip = $usarEquip == 's';
+                break;
+            }
+            if ($associarEquip) {
+                while (true) {
+                    listarEquipamentos($dados->getEquipamentos());
+                    if (empty($dados->getEquipamentos())) {
+                        break;
+                    }
+                    $eidx = lerSomenteNumeros("Escolha o índice do equipamento (Enter para cancelar): ");
+                    if($eidx == '') {
+                        echo "Nenhum equipamento será associado.\n";
+                        break;
+                    }
+                    if (!is_numeric($eidx) || !array_key_exists((int)$eidx, $dados->getEquipamentos())) {
+                        echo "Índice inválido.\n";
+                        continue;
+                    }
+                    $equipObj = $dados->getEquipamentos()[(int)$eidx]; 
+                    break;
                 }
             }
 
-            $series = (int) ler("Número de séries: ");
-            $reps = (int) ler("Número de repetições: ");
-            $desc = (int) ler("Tempo de descanso (segundos): ");
+            $series = lerSomenteNumeros("Número de séries: ");
+            $reps = lerSomenteNumeros("Número de repetições: ");
+            $desc = lerSomenteNumeros("Tempo de descanso (segundos): ");
 
             $treino = new Treino($nomeEx, $tipoObj, $equipObj, $series, $reps, $desc);
             $ficha->adicionarTreino($dia, $treino);
 
-            echo "Treino adicionado ao dia {$dia}.\n";
+            echo "Treino adicionado.\n";
             pausar();
         } elseif ($op === '2') {
             $dia = escolherDia();
-            if ($dia === null) { pausar(); continue; }
+            if ($dia === null) { 
+                pausar(); 
+                continue; 
+            }
             $treinos = $ficha->getTreinos()[$dia];
             if (empty($treinos)) {
                 echo "Nenhum treino nesse dia.\n";
@@ -218,14 +211,17 @@ function editarFicha(array &$alunos, array &$equipamentos, array &$exercicioTipo
                 continue;
             }
             foreach ($treinos as $i => $t) {
-                echo "[$i] " . $t->detalhes() . PHP_EOL;
+                echo "[$i] " . $t->detalhes() ."\n";
             }
-            $ridx = ler("Índice do treino a remover (vazio para cancelar): ");
-            if ($ridx === '') continue;
-            if (!is_numeric($ridx) || !isset($treinos[(int)$ridx])) {
-                echo "Índice inválido.\n";
-                pausar();
-                continue;
+            while (true) {
+                $ridx = ler("Índice do treino a remover (vazio para cancelar): ");
+                if ($ridx === '') continue 2;
+                if (!is_numeric($ridx) || !isset($treinos[(int)$ridx])) {
+                    echo "Índice inválido.\n";
+                    pausar();
+                    continue;
+                }
+                break;
             }
             $ficha->removerTreino($dia, (int)$ridx);
             echo "Treino removido.\n";

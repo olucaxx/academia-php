@@ -74,11 +74,11 @@
 
             $detalhes = "";
             $detalhes .= "Exercício: {$this->getExercicio()}\n";
-            $detalhes .= "Grupo: {$this->getTipo()->getNome()}\n";
-            $detalhes .= "Equipamento: {$nomeEquipamento}\n";
-            $detalhes .= "Quant. Series: {$this->getSeries()}\n";
-            $detalhes .= "Quant. Repetições: {$this->getRepeticoes()}\n";
-            $detalhes .= "Tempo descanso (seg): {$this->getDescanso()}\n";
+            $detalhes .= "      Grupo: {$this->getTipo()->getNome()}\n";
+            $detalhes .= "      Equipamento: {$nomeEquipamento}\n";
+            $detalhes .= "      Quant. Series: {$this->getSeries()}\n";
+            $detalhes .= "      Quant. Repetições: {$this->getRepeticoes()}\n";
+            $detalhes .= "      Tempo descanso (seg): {$this->getDescanso()}\n";
             return $detalhes;
         }
     }
