@@ -19,12 +19,13 @@ function menuEquipamentos(Dados $dados): void {
             case '1':
                 $nome = ler("Nome do equipamento: ");
                 while (true) {
-                    $funcionando = strtolower(ler("Ativo? (s/n): "));
-                    if ($funcionando != 's' && $funcionando != 'n') {
+                    $funcionando = strtolower(ler("Já está funcionando? (s/n): "));
+                    if ($funcionando !== 's' && $funcionando !== 'n') {
                         echo "Opção inválida!\n";
                         continue;
                     }
                     $ativo = $funcionando == 's';
+                    break;
                 }
                 $equip = new Equipamento($nome, $ativo);
                 $dados->adicionarEquipamento($equip);
